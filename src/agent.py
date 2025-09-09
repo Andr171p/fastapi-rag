@@ -44,7 +44,7 @@ def format_messages(messages: Sequence[BaseMessage]) -> str:
     )
 
 
-async def agent_node(state: MessagesState) -> MessagesState:
+async def rag_node(state: MessagesState) -> MessagesState:
     chain = retriever | ChatPromptTemplate.from_template(SYSTEM_PROMPT) | model
     user_prompt = state["messages"][-1]
     chat_history = format_messages(state["messages"])
@@ -58,9 +58,9 @@ def compile_graph(
         checkpointer: BaseCheckpointSaver[MessagesState]
 ) -> CompiledStateGraph[MessagesState]:
     workflow = StateGraph(MessagesState)
-    workflow.add_node("agent", agent_node)
-    workflow.add_edge(START, "agent")
-    workflow.add_edge("agent", END)
+    workflow.add_node("rag", rag_node)
+    workflow.add_edge(START, "rag")
+    workflow.add_edge("rag", END)
     return workflow.compile(checkpointer=checkpointer)
 
 
