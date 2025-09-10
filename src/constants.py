@@ -1,3 +1,0 @@
-TIMEOUT = 120
-TTL = 3600
-TOP_K = 10

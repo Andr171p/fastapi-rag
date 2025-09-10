@@ -1,0 +1,42 @@
+from typing import Final
+
+from functools import cache
+
+from langchain_core.embeddings import Embeddings
+from langchain_core.vectorstores import VectorStore
+from langchain_core.language_models import BaseChatModel
+from langchain_gigachat import GigaChat
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_pinecone import PineconeVectorStore
+from langchain_text_splitters import TextSplitter, RecursiveCharacterTextSplitter
+
+from .constants import TIMEOUT, CHUNK_SIZE, CHUNK_OVERLAP
+from .settings import settings
+
+splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
+    chunk_size=CHUNK_SIZE,
+    chunk_overlap=CHUNK_OVERLAP,
+    length_function=len
+)
+
+embeddings: Final[Embeddings] = HuggingFaceEmbeddings(
+    model_name=settings.embeddings.model_name,
+    model_kwargs=settings.embeddings.model_kwargs,
+    encode_kwargs=settings.embeddings.encode_kwargs,
+)
+
+
+def get_vectorstore() -> VectorStore:
+    return PineconeVectorStore(
+        embedding=embeddings, pinecone_api_key=settings.pinecone.api_key, index_name="main"
+    )
+
+
+model: Final[BaseChatModel] = GigaChat(
+    credentials=settings.gigachat.api_key,
+    scope=settings.gigachat.scope,
+    model=settings.gigachat.model_name,
+    profanity_check=False,
+    verify_ssl_certs=False,
+    timeout=TIMEOUT
+)

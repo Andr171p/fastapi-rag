@@ -8,14 +8,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = BASE_DIR / ".env"
+TEMP_DIR = BASE_DIR / ".tmp"
 
-load_dotenv(str(ENV_PATH))
+load_dotenv(ENV_PATH)
 
 
 class GigaChatSettings(BaseSettings):
     api_key: str = ""
     scope: str = ""
-    model_name: str = ""
+    model_name: str = "GigaChat:latest"
 
     model_config = SettingsConfigDict(env_prefix="GIGACHAT_")
 
