@@ -40,7 +40,7 @@ async def upload_document(
     path="/admin/documents/search",
     status_code=status.HTTP_200_OK,
     response_model=list[Document],
-    summary=""
+    summary="Выполняет поиск документов по базе знаний"
 )
 async def search_documents(
         query: Annotated[str, Query(..., description="Запрос для поиска")],
@@ -53,7 +53,7 @@ async def search_documents(
 @router.delete(
     path="/admin/documents",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Удаляет документы"
+    summary="Удаляет документы по их ID"
 )
 async def delete_documents(
         documents: DocumentsDelete,
