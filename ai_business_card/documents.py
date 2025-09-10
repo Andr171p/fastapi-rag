@@ -37,12 +37,17 @@ async def store_document(file_path: str) -> list[str]:
             media = DocxMedia(docx)
             converter = Converter(docx.document(), media, use_md_table=True)
             text = converter.convert()
+            docx.close()
         case "pdf":
             text = pymupdf4llm.to_markdown(file_path)
+
+            import gc
+
+            gc.collect()
         case _:
             async with aiofiles.open(file_path, encoding="utf-8") as file:
                 text = await file.read()
-    # os.remove(file_path)
+    os.remove(file_path)
     logger.info("File %s successfully handled", file_path)
     chunks = splitter.split_documents([
         Document(page_content=text, metadata={"file_path": file_path})
