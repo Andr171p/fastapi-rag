@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 from uuid import uuid4
 
 import aiofiles
@@ -8,8 +8,8 @@ from docx2md import Converter, DocxFile, DocxMedia
 from langchain_core.documents import Document
 
 from .constants import EXTENSIONS
+from .depends import get_vectorstore, splitter
 from .settings import TEMP_DIR
-from .depends import splitter, get_vectorstore
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,7 @@ async def store_document(file_path: str) -> list[str]:
             docx.close()
         case "pdf":
             text = pymupdf4llm.to_markdown(file_path)
-
-            import gc
-
+            import gc  # noqa: PLC0415
             gc.collect()
         case _:
             async with aiofiles.open(file_path, encoding="utf-8") as file:

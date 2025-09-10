@@ -1,16 +1,14 @@
 from typing import Final
 
-from functools import cache
-
 from langchain_core.embeddings import Embeddings
-from langchain_core.vectorstores import VectorStore
 from langchain_core.language_models import BaseChatModel
+from langchain_core.vectorstores import VectorStore
 from langchain_gigachat import GigaChat
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from langchain_text_splitters import TextSplitter, RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
 
-from .constants import TIMEOUT, CHUNK_SIZE, CHUNK_OVERLAP
+from .constants import CHUNK_OVERLAP, CHUNK_SIZE, TIMEOUT
 from .settings import settings
 
 splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(

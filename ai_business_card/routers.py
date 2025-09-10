@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, UploadFile, File, Query, HTTPException, status
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 
@@ -9,7 +9,7 @@ from .depends import get_vectorstore
 from .documents import save_temp_file, store_document
 from .schemas import DocumentsDelete, Message
 
-router = APIRouter(prefix="/api/v1")
+router = APIRouter(prefix="/api/v1", tags=["API"])
 
 
 @router.post(
@@ -59,9 +59,4 @@ async def delete_documents(
         documents: DocumentsDelete,
         vectorstore: Annotated[VectorStore, Depends(get_vectorstore)]
 ) -> None:
-    is_deleted = await vectorstore.adelete(documents.ids)
-    if not is_deleted:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Wrong documents identifiers!"
-        )
+    await vectorstore.adelete(documents.ids)
