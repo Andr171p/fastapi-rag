@@ -2,13 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from langchain_core.documents import Document
-from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.vectorstores import VectorStore
 
 from .agent import run_agent
 from .depends import get_vectorstore
 from .documents import save_temp_file, store_file, store_text
-from .schemas import DocumentAdd, DocumentsDelete
+from .schemas import DocumentAdd, DocumentsDelete, Message, Role
 
 router = APIRouter(prefix="/api/v1", tags=["API"])
 
@@ -16,11 +15,12 @@ router = APIRouter(prefix="/api/v1", tags=["API"])
 @router.post(
     path="/chat/completion/{thread_id}",
     status_code=status.HTTP_200_OK,
-    response_model=AIMessage,
+    response_model=Message,
     summary="Чат с AI ассистентом",
 )
-async def chat(thread_id: str, messages: list[BaseMessage]) -> AIMessage:
-    return await run_agent(thread_id, messages)
+async def chat(thread_id: str, messages: list[Message]) -> Message:
+    response = await run_agent(thread_id, messages)
+    return Message(role=Role.AI, content=response)
 
 
 @router.post(

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
 from langchain_core.documents import Document
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langgraph.checkpoint.base import BaseCheckpointSaver
@@ -13,6 +13,7 @@ from langgraph.graph.state import CompiledStateGraph, StateGraph
 from .constants import TOP_K, TTL
 from .depends import get_vectorstore, model
 from .prompts import SYSTEM_PROMPT
+from .schemas import Message
 from .settings import settings
 
 
@@ -55,10 +56,10 @@ def compile_graph(
     return graph.compile(checkpointer=checkpointer)
 
 
-async def run_agent(thread_id: str, messages: list[BaseMessage]) -> AIMessage:
+async def run_agent(thread_id: str, messages: list[Message]) -> str:
     config = {"configurable": {"thread_id": thread_id}}
     input = {"messages": [message.model_dump() for message in messages]}
     async with AsyncRedisSaver(redis_url=settings.redis.url, ttl=TTL) as checkpointer:
         graph = compile_graph(checkpointer)
         response = await graph.ainvoke(input, config=config)
-    return response["messages"][-1]
+    return response["messages"][-1].content
