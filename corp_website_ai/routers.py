@@ -13,13 +13,13 @@ router = APIRouter(prefix="/api/v1", tags=["API"])
 
 
 @router.post(
-    path="/chat/completion/{thread_id}",
+    path="/chat/{id}/completion",
     status_code=status.HTTP_200_OK,
     response_model=Message,
     summary="Чат с AI ассистентом",
 )
-async def chat(thread_id: str, messages: list[Message]) -> Message:
-    response = await run_agent(thread_id, messages)
+async def chat(id: str, messages: list[Message]) -> Message:  # noqa: A002
+    response = await run_agent(id, messages)
     return Message(role=Role.AI, content=response)
 
 

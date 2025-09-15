@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from ai_business_card.routers import router
+from corp_website_ai.routers import router
 
 logging.basicConfig(level=logging.INFO)
 
