@@ -16,4 +16,4 @@ langchain-text-splitters~=0.3.11
 pydantic~=2.11.7
 python-dotenv~=1.1.1
 pydantic-settings~=2.10.1
-embeddings-service @ git+https://github.com/Andr171p/embeddings-service.git
+embeddings-service[langchain] @ git+https://github.com/Andr171p/embeddings-service.git
