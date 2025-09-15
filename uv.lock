@@ -262,7 +262,7 @@ wheels = [
 [[package]]
 name = "embeddings-service"
 version = "0.1.0"
-source = { git = "https://github.com/Andr171p/embeddings-service.git#3dceb4669151f38274724669de0e8f41bc7853fa" }
+source = { git = "https://github.com/Andr171p/embeddings-service.git#313be3b47d6b69c30f01e8572a7afcc17a41d051" }
 dependencies = [
     { name = "aiohttp" },
     { name = "fastapi", extra = ["all"] },

@@ -45,7 +45,7 @@ async def store_file(file_path: str) -> list[str]:
         case _:
             async with aiofiles.open(file_path, encoding="utf-8") as file:
                 text = await file.read()
-    os.remove(file_path)
+    # os.remove(file_path)
     logger.info("File %s successfully handled", file_path)
     chunks = splitter.split_documents([
         Document(page_content=text, metadata={"file_path": file_path})
