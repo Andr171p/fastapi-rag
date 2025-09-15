@@ -33,7 +33,8 @@ async def agent_node(state: MessagesState) -> MessagesState:
     chain = (
         {
             "context": vectorstore.as_retriever(k=TOP_K) | format_documents,
-            "query": RunnablePassthrough(),
+            "chat_history": RunnablePassthrough(),
+            "user_prompt": RunnablePassthrough(),
         }
         | ChatPromptTemplate.from_template(SYSTEM_PROMPT)
         | model
