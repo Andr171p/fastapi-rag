@@ -1,9 +1,10 @@
+import operator
 from collections.abc import Sequence
 
 from langchain_core.documents import Document
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.checkpoint.redis import AsyncRedisSaver
 from langgraph.graph import END, START
@@ -33,8 +34,8 @@ async def agent_node(state: MessagesState) -> MessagesState:
     chain = (
         {
             "context": vectorstore.as_retriever(k=TOP_K) | format_documents,
-            "chat_history": RunnablePassthrough(),
-            "user_prompt": RunnablePassthrough(),
+            "chat_history": RunnablePassthrough() | RunnableLambda(operator.itemgetter("chat_history")),
+            "user_prompt": RunnablePassthrough() | RunnableLambda(operator.itemgetter("user_prompt")),
         }
         | ChatPromptTemplate.from_template(SYSTEM_PROMPT)
         | model
