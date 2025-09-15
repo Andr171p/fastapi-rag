@@ -1,10 +1,10 @@
 from typing import Final
 
+from embeddings_service.langchain import RemoteHTTPEmbeddings
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from langchain_core.vectorstores import VectorStore
 from langchain_gigachat import GigaChat
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
 
@@ -17,16 +17,14 @@ splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
     length_function=len
 )
 
-embeddings: Final[Embeddings] = HuggingFaceEmbeddings(
-    model_name=settings.embeddings.model_name,
-    model_kwargs=settings.embeddings.model_kwargs,
-    encode_kwargs=settings.embeddings.encode_kwargs,
+embeddings: Final[Embeddings] = RemoteHTTPEmbeddings(
+    base_url=settings.embeddings.base_url, normalize_embeddings=False
 )
 
 
 def get_vectorstore() -> VectorStore:
     return PineconeVectorStore(
-        embedding=embeddings, pinecone_api_key=settings.pinecone.api_key, index_name="main"
+        embedding=embeddings, pinecone_api_key=settings.pinecone.api_key, index_name="website"
     )
 
 

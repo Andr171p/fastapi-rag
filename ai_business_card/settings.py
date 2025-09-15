@@ -36,6 +36,9 @@ class EmbeddingsSettings(BaseModel):
     model_name: str = "deepvk/USER-bge-m3"
     model_kwargs: dict[str, str] = {"device": "cpu"}
     encode_kwargs: dict[str, bool] = {"normalize_embeddings": False}
+    base_url: str = "http://127.0.0.1:8000"
+
+    model_config = SettingsConfigDict(env_prefix="EMBEDDINGS_")
 
 
 class PineconeSettings(BaseSettings):

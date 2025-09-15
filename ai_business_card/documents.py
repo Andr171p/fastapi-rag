@@ -22,7 +22,7 @@ async def save_temp_file(filename: str, content: bytes) -> str:
     return str(file_path)
 
 
-async def store_document(file_path: str) -> list[str]:
+async def store_file(file_path: str) -> list[str]:
     vectorstore = get_vectorstore()
     extension = str(file_path).split(".")[-1]
     if extension not in EXTENSIONS:
@@ -54,6 +54,15 @@ async def store_document(file_path: str) -> list[str]:
         "File %s split to % chunks",
         file_path, len(chunks)
     )
+    return await vectorstore.aadd_documents(
+        chunks, ids=[str(uuid4()) for _ in range(len(chunks))]
+    )
+
+
+async def store_text(text: str) -> list[str]:
+    vectorstore = get_vectorstore()
+    chunks = splitter.split_documents([Document(page_content=text)])
+    logger.info("Document split to % chunks", len(chunks))
     return await vectorstore.aadd_documents(
         chunks, ids=[str(uuid4()) for _ in range(len(chunks))]
     )

@@ -6,8 +6,8 @@ from langchain_core.vectorstores import VectorStore
 
 from .agent import run_agent
 from .depends import get_vectorstore
-from .documents import save_temp_file, store_document
-from .schemas import DocumentsDelete, Message
+from .documents import save_temp_file, store_file, store_text
+from .schemas import DocumentAdd, DocumentsDelete, Message
 
 router = APIRouter(prefix="/api/v1", tags=["API"])
 
@@ -24,16 +24,26 @@ async def chat(message: Message) -> Message:
 
 
 @router.post(
+    path="/admin/documents",
+    status_code=status.HTTP_201_CREATED,
+    response_model=list[str],
+    summary="Добавляет текст в базу знаний"
+)
+async def add_document(document: DocumentAdd) -> list[str]:
+    return await store_text(document.text)
+
+
+@router.post(
     path="/admin/documents/upload",
     status_code=status.HTTP_201_CREATED,
     response_model=list[str],
-    summary="Загружает документ в базу знаний"
+    summary="Загружает файл в базу знаний"
 )
 async def upload_document(
         file: Annotated[UploadFile, File(..., description="Документ для загрузки")],
 ) -> list[str]:
     file_path = await save_temp_file(file.filename, await file.read())
-    return await store_document(file_path)
+    return await store_file(file_path)
 
 
 @router.get(

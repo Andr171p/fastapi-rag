@@ -13,3 +13,7 @@ class Message(BaseModel):
 
 class DocumentsDelete(BaseModel):
     ids: list[str | UUID]
+
+
+class DocumentAdd(BaseModel):
+    text: str
