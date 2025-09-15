@@ -38,7 +38,7 @@ async def agent_node(state: MessagesState) -> MessagesState:
         | ChatPromptTemplate.from_template(SYSTEM_PROMPT)
         | model
     )
-    user_prompt = state["messages"][-1]
+    user_prompt = state["messages"][-1].content
     chat_history = format_messages(state["messages"])
     ai_message = await chain.ainvoke({
         "user_prompt": user_prompt, "chat_history": chat_history
