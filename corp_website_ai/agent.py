@@ -40,9 +40,9 @@ def compile_graph(
     return graph.compile(checkpointer=checkpointer)
 
 
-async def run_agent(chat_id: str, messages: list[Message]) -> str:
+async def run_agent(chat_id: str, message: Message) -> str:
     config = {"configurable": {"thread_id": chat_id}}
-    state = {"messages": [message.model_dump() for message in messages]}
+    state = {"messages": [message.model_dump()]}
     async with AsyncRedisSaver(redis_url=settings.redis.url, ttl=TTL) as checkpointer:
         graph = compile_graph(checkpointer)
         response = await graph.ainvoke(state, config=config)

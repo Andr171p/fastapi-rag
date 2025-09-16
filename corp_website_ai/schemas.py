@@ -14,6 +14,14 @@ class Message(BaseModel):
     content: str
 
 
+class HumanMessage(Message):
+    role: Role = Role.HUMAN
+
+
+class AIMessage(Message):
+    role: Role = Role.AI
+
+
 class DocumentsDelete(BaseModel):
     ids: list[str | UUID]
 

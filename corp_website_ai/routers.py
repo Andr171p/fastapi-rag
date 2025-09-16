@@ -7,7 +7,7 @@ from langchain_core.vectorstores import VectorStore
 from .agent import run_agent
 from .depends import get_vectorstore
 from .documents import save_temp_file, store_file, store_text
-from .schemas import DocumentAdd, DocumentsDelete, Message, Role
+from .schemas import AIMessage, DocumentAdd, DocumentsDelete, HumanMessage
 
 router = APIRouter(prefix="/api/v1", tags=["API"])
 
@@ -15,12 +15,12 @@ router = APIRouter(prefix="/api/v1", tags=["API"])
 @router.post(
     path="/chat/{id}/completion",
     status_code=status.HTTP_200_OK,
-    response_model=Message,
+    response_model=AIMessage,
     summary="Чат с AI ассистентом",
 )
-async def chat(id: str, messages: list[Message]) -> Message:  # noqa: A002
-    response = await run_agent(id, messages)
-    return Message(role=Role.AI, content=response)
+async def chat(id: str, message: HumanMessage) -> AIMessage:  # noqa: A002
+    response = await run_agent(id, message)
+    return AIMessage(content=response)
 
 
 @router.post(
