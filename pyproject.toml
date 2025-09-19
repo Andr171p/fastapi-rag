@@ -6,7 +6,7 @@ requires-python = ">=3.13"
 dependencies = [
     "aiofiles>=24.1.0",
     "docx2md>=1.0.4",
-    "embeddings-service",
+    "embeddings-service[langchain]",
     "fastapi[all]>=0.116.1",
     "langchain>=0.3.27",
     "langchain-gigachat>=0.3.12",
