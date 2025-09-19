@@ -43,7 +43,7 @@ def compile_graph(
 async def run_agent(chat_id: str, message: Message) -> str:
     config = {"configurable": {"thread_id": chat_id}}
     state = {"messages": [message.model_dump()]}
-    ttl_config = {"default_ttl": TTL, "refresh_on_read": True}
+    ttl_config = {"default_ttl": TTL // 60, "refresh_on_read": True}
     async with AsyncRedisSaver.from_conn_string(
             settings.redis.url, ttl=ttl_config
     ) as checkpointer:
