@@ -1,0 +1,3 @@
+
+class RedisCheckpointException(Exception):
+    pass

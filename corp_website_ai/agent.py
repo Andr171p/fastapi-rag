@@ -1,16 +1,14 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langgraph.checkpoint.base import BaseCheckpointSaver
-from langgraph.checkpoint.redis import AsyncRedisSaver
 from langgraph.graph import END, START
 from langgraph.graph.message import MessagesState
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
-from .constants import TOP_K, TTL
-from .depends import get_vectorstore, model
+from .constants import TOP_K
+from .depends import get_vectorstore, model, saver
 from .prompts import SYSTEM_PROMPT, USER_PROMPT
 from .schemas import Message
-from .settings import settings
 from .utils import format_documents, format_messages
 
 
@@ -43,11 +41,6 @@ def compile_graph(
 async def run_agent(chat_id: str, message: Message) -> str:
     config = {"configurable": {"thread_id": chat_id}}
     state = {"messages": [message.model_dump()]}
-    ttl_config = {"default_ttl": TTL // 60, "refresh_on_read": True}
-    async with AsyncRedisSaver.from_conn_string(
-            settings.redis.url, ttl=ttl_config
-    ) as checkpointer:
-        await checkpointer.setup()
-        graph = compile_graph(checkpointer)
-        response = await graph.ainvoke(state, config=config)
+    graph = compile_graph(saver)
+    response = await graph.ainvoke(state, config=config)
     return response["messages"][-1].content
