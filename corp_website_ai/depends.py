@@ -18,7 +18,7 @@ splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
 )
 
 embeddings: Final[Embeddings] = RemoteHTTPEmbeddings(
-    base_url=settings.embeddings.base_url, normalize_embeddings=False
+    base_url=settings.embeddings.base_url, normalize_embeddings=False, timeout=60
 )
 
 
