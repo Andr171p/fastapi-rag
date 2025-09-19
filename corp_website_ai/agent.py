@@ -44,7 +44,10 @@ async def run_agent(chat_id: str, message: Message) -> str:
     config = {"configurable": {"thread_id": chat_id}}
     state = {"messages": [message.model_dump()]}
     ttl_config = {"default_ttl": TTL, "refresh_on_read": True}
-    async with AsyncRedisSaver(redis_url=settings.redis.url, ttl=ttl_config) as checkpointer:
+    async with AsyncRedisSaver.from_conn_string(
+            settings.redis.url, ttl=ttl_config
+    ) as checkpointer:
+        await checkpointer.setup()
         graph = compile_graph(checkpointer)
         response = await graph.ainvoke(state, config=config)
     return response["messages"][-1].content
