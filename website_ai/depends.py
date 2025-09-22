@@ -7,15 +7,16 @@ from langchain_core.vectorstores import VectorStore
 from langchain_gigachat import GigaChat
 from langchain_pinecone import PineconeVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from redis.asyncio import Redis
 
-from .checkpointer.saver import AsyncRedisCheckpointSaver
+from .checkpoint import AsyncRedisSaver
 from .constants import CHUNK_OVERLAP, CHUNK_SIZE, TIMEOUT
 from .settings import settings
 
-redis = Redis.from_url(settings.redis.url)
+redis: Final[Redis] = Redis.from_url(settings.redis.url)
 
-saver = AsyncRedisCheckpointSaver(redis)
+saver: Final[BaseCheckpointSaver] = AsyncRedisSaver(redis)
 
 splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
     chunk_size=CHUNK_SIZE,

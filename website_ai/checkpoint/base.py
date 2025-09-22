@@ -1,4 +1,11 @@
-from typing import Optional, Union, TypedDict
+from typing import TypedDict
+
+REDIS_KEY_SEPARATOR = "$"
+TTL = 3600
+
+
+class RedisCheckpointError(Exception):
+    pass
 
 
 class RedisCheckpointKey(TypedDict):
@@ -12,4 +19,4 @@ class RedisCheckpointWritesKey(TypedDict):
     checkpoint_ns: str
     checkpoint_id: str
     task_id: str
-    idx: Optional[Union[int, str]]
+    idx: int | str | None

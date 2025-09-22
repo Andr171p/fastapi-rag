@@ -1,17 +1,13 @@
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .dto import (
-        RedisCheckpointKey,
-        RedisCheckpointWritesKey
-    )
+    from .base import RedisCheckpointKey, RedisCheckpointWritesKey
 
 from langchain_core.runnables import RunnableConfig
-
-from langgraph.checkpoint.serde.base import SerializerProtocol
 from langgraph.checkpoint.base import CheckpointTuple, PendingWrite
+from langgraph.checkpoint.serde.base import SerializerProtocol
 
-from .constants import REDIS_KEY_SEPARATOR
+from .base import REDIS_KEY_SEPARATOR
 
 
 def _make_redis_checkpoint_key(
@@ -27,7 +23,7 @@ def _make_redis_checkpoint_writes_key(
         checkpoint_ns: str,
         checkpoint_id: str,
         task_id: str,
-        idx: Optional[int]
+        idx: int | None
 ) -> str:
     if idx is None:
         return REDIS_KEY_SEPARATOR.join(
@@ -67,10 +63,10 @@ def _parse_redis_checkpoint_writes_key(redis_key: str) -> "RedisCheckpointWrites
 
 
 def _filter_keys(
-        keys: List[str],
-        before: Optional[RunnableConfig],
-        limit: Optional[int]
-) -> List[str]:
+        keys: list[str],
+        before: RunnableConfig | None,
+        limit: int | None
+) -> list[str]:
     if before:
         keys = [
             key
@@ -90,9 +86,9 @@ def _filter_keys(
 
 def _load_writes(
         serde: SerializerProtocol,
-        task_id_to_data: dict[Tuple[str, str], dict]
-) -> List[PendingWrite]:
-    writes = [
+        task_id_to_data: dict[tuple[str, str], dict]
+) -> list[PendingWrite]:
+    return [
         (
             task_id,
             data[b"channel"].decode(),
@@ -100,15 +96,14 @@ def _load_writes(
         )
         for (task_id, _), data in task_id_to_data.items()
     ]
-    return writes
 
 
 def _parse_redis_checkpoint_data(
         serde: SerializerProtocol,
         key: str,
         data: dict,
-        pending_writes: Optional[List[PendingWrite]] = None
-) -> Optional[CheckpointTuple]:
+        pending_writes: list[PendingWrite] | None = None
+) -> CheckpointTuple | None:
     if not data:
         return None
 

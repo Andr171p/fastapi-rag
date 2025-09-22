@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from corp_website_ai.documents import store_file
+from website_ai.documents import store_file
 
 logging.basicConfig(level=logging.INFO)
 
