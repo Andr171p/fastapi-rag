@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = BASE_DIR / ".env"
 TEMP_DIR = BASE_DIR / ".tmp"
+PROMPTS_DIR = BASE_DIR / "prompts"
 
 load_dotenv(ENV_PATH)
 

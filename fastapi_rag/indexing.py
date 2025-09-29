@@ -1,15 +1,16 @@
 import logging
 import os
-from uuid import uuid4
 
 import aiofiles
 import pymupdf4llm
 from docx2md import Converter, DocxFile, DocxMedia
 from langchain_core.documents import Document
+from langchain_core.runnables import RunnablePassthrough
 
-from .constants import EXTENSIONS
-from .depends import get_vectorstore, splitter
+from .depends import splitter, vectorstore
 from .settings import TEMP_DIR
+
+AVAILABLE_EXTENSIONS: tuple[str, ...] = ("doc", "docx", "pdf", "txt", "md")
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +23,13 @@ async def save_temp_file(filename: str, content: bytes) -> str:
     return str(file_path)
 
 
-async def store_file(file_path: str) -> list[str]:
-    vectorstore = get_vectorstore()
+async def process_file(filename: str, content: bytes) -> Document:
+    file_path = await save_temp_file(filename, content)
     extension = str(file_path).split(".")[-1]
-    if extension not in EXTENSIONS:
+    if extension not in AVAILABLE_EXTENSIONS:
         raise ValueError(
             f"""Unsupported file format: {extension},
-            supported extensions: {EXTENSIONS}
+            supported extensions: {AVAILABLE_EXTENSIONS}
             """
         )
     match extension:
@@ -48,22 +49,23 @@ async def store_file(file_path: str) -> list[str]:
     if ".tmp" in file_path:
         os.remove(file_path)
     logger.info("File %s successfully handled", file_path)
-    chunks = splitter.split_documents([
-        Document(page_content=text, metadata={"file_path": file_path})
-    ])
-    logger.info(
-        "File %s split to % chunks",
-        file_path, len(chunks)
-    )
-    return await vectorstore.aadd_documents(
-        chunks, ids=[str(uuid4()) for _ in range(len(chunks))]
+    return Document(
+        page_content=text,
+        metadata={"filename": file_path.rsplit("\\", maxsplit=1)[-1]}
     )
 
 
-async def store_text(text: str) -> list[str]:
-    vectorstore = get_vectorstore()
-    chunks = splitter.split_documents([Document(page_content=text)])
-    logger.info("Document split to % chunks", len(chunks))
-    return await vectorstore.aadd_documents(
-        chunks, ids=[str(uuid4()) for _ in range(len(chunks))]
-    )
+def split_documents(documents: list[Document]) -> list[Document]:
+    return splitter.split_documents(documents)
+
+
+async def save_documents(documents: list[Document]) -> list[Document]:
+    await vectorstore.aadd_documents(documents)
+    return documents
+
+
+indexing_chain = (
+    RunnablePassthrough()
+    | split_documents
+    | save_documents
+)

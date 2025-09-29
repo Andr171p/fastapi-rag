@@ -1,11 +1,9 @@
 import logging
 
-from fastapi import FastAPI
+import uvicorn
 
-from website_ai.routers import router
+from fastapi_rag.app import app
 
-logging.basicConfig(level=logging.INFO)
-
-app = FastAPI(title="Сервис - AI ассистент для сайта визитки компании")
-
-app.include_router(router)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")  # noqa: S104

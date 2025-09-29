@@ -7,16 +7,15 @@ from langchain_core.vectorstores import VectorStore
 from langchain_gigachat import GigaChat
 from langchain_pinecone import PineconeVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
-from langgraph.checkpoint.base import BaseCheckpointSaver
 from redis.asyncio import Redis
 
-from .checkpoint import AsyncRedisSaver
-from .constants import CHUNK_OVERLAP, CHUNK_SIZE, TIMEOUT
 from .settings import settings
 
-redis: Final[Redis] = Redis.from_url(settings.redis.url)
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 20
+TIMEOUT = 120
 
-saver: Final[BaseCheckpointSaver] = AsyncRedisSaver(redis)
+redis: Final[Redis] = Redis.from_url(settings.redis.url)
 
 splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
     chunk_size=CHUNK_SIZE,
@@ -28,14 +27,11 @@ embeddings: Final[Embeddings] = RemoteHTTPEmbeddings(
     base_url=settings.embeddings.base_url, normalize_embeddings=False, timeout=60
 )
 
+vectorstore: Final[VectorStore] = PineconeVectorStore(
+    embedding=embeddings, pinecone_api_key=settings.pinecone.api_key, index_name="main"
+)
 
-def get_vectorstore() -> VectorStore:
-    return PineconeVectorStore(
-        embedding=embeddings, pinecone_api_key=settings.pinecone.api_key, index_name="website"
-    )
-
-
-model: Final[BaseChatModel] = GigaChat(
+llm: Final[BaseChatModel] = GigaChat(
     credentials=settings.gigachat.api_key,
     scope=settings.gigachat.scope,
     model=settings.gigachat.model_name,
