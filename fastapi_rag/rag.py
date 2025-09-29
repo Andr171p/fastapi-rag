@@ -9,7 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 
-from .depends import llm, redis, vectorstore
+from .depends import ensemble_retriever, llm, redis
 from .prompts import SYSTEM_PROMPT, USER_PROMPT
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ async def retrieve(
 ) -> dict[str, list[Document]]:
     logger.info("---RETRIEVE---")
     k = config["configurable"]["k"]
-    documents = await vectorstore.as_retriever(k=k).ainvoke(state["query"])
+    documents = await ensemble_retriever.ainvoke(state["query"], k=k)
     return {"documents": documents}
 
 

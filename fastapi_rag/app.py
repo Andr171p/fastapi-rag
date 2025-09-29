@@ -31,7 +31,7 @@ app: Final[FastAPI] = FastAPI()
 
 
 @app.post(
-    path="api/v1/documents",
+    path="/api/v1/documents",
     status_code=status.HTTP_201_CREATED,
     response_model=list[Document],
     summary="",
@@ -41,7 +41,7 @@ async def add_document(document: Document) -> list[Document]:
 
 
 @app.post(
-    path="api/v1/documents/upload",
+    path="/api/v1/documents/upload",
     status_code=status.HTTP_201_CREATED,
     response_model=list[Document],
     summary="",
@@ -52,7 +52,7 @@ async def upload_document(file: UploadFile = File(...)) -> list[Document]:
 
 
 @app.post(
-    path="api/v1/rag",
+    path="/api/v1/rag",
     status_code=status.HTTP_200_OK,
     response_model=Message,
     summary="",

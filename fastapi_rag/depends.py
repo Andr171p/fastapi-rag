@@ -1,11 +1,15 @@
 from typing import Final
 
+from elasticsearch import Elasticsearch
 from embeddings_service.langchain import RemoteHTTPEmbeddings
+from langchain.retrievers import EnsembleRetriever
+from langchain_community.retrievers import ElasticSearchBM25Retriever
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
+from langchain_core.retrievers import BaseRetriever
 from langchain_core.vectorstores import VectorStore
+from langchain_elasticsearch import ElasticsearchStore
 from langchain_gigachat import GigaChat
-from langchain_pinecone import PineconeVectorStore
 from langchain_text_splitters import (
     MarkdownHeaderTextSplitter,
     RecursiveCharacterTextSplitter,
@@ -33,11 +37,23 @@ text_splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
 )
 
 embeddings: Final[Embeddings] = RemoteHTTPEmbeddings(
-    base_url=settings.embeddings.base_url, normalize_embeddings=False, timeout=60
+    base_url=settings.embeddings.base_url, normalize_embeddings=False, timeout=TIMEOUT
 )
 
-vectorstore: Final[VectorStore] = PineconeVectorStore(
-    embedding=embeddings, pinecone_api_key=settings.pinecone.api_key, index_name="main"
+vectorstore: Final[VectorStore] = ElasticsearchStore(
+    es_url=settings.elasticsearch.url,
+    index_name="rag-index",
+    embedding=embeddings,
+)
+
+similarity_retriever: Final[BaseRetriever] = vectorstore.as_retriever(search_type="similarity")
+
+bm25_retriever: Final[BaseRetriever] = ElasticSearchBM25Retriever(
+    client=Elasticsearch(settings.elasticsearch.url), index_name="rag-index",
+)
+
+ensemble_retriever: Final[BaseRetriever] = EnsembleRetriever(
+    retrievers=[similarity_retriever, bm25_retriever], weights=[0.6, 0.4]
 )
 
 llm: Final[BaseChatModel] = GigaChat(
@@ -46,5 +62,5 @@ llm: Final[BaseChatModel] = GigaChat(
     model=settings.gigachat.model_name,
     profanity_check=False,
     verify_ssl_certs=False,
-    timeout=TIMEOUT
+    timeout=TIMEOUT,
 )

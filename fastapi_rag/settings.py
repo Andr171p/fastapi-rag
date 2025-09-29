@@ -41,17 +41,28 @@ class EmbeddingsSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="EMBEDDINGS_")
 
 
-class PineconeSettings(BaseSettings):
-    api_key: str = ""
+class ElasticsearchSettings(BaseSettings):
+    username: str = ""
+    password: str = ""
+    host: str = "localhost"
+    port: int = 9200
 
-    model_config = SettingsConfigDict(env_prefix="PINECONE_")
+    model_config = SettingsConfigDict(env_prefix="ELASTICSEARCH_")
+
+    @property
+    def auth(self) -> tuple[str, str]:
+        return self.username, self.password
+
+    @property
+    def url(self) -> str:
+        return f"http://{self.host}:{self.port}"
 
 
 class Settings(BaseSettings):
     gigachat: GigaChatSettings = GigaChatSettings()
     embeddings: EmbeddingsSettings = EmbeddingsSettings()
     redis: RedisSettings = RedisSettings()
-    pinecone: PineconeSettings = PineconeSettings()
+    elasticsearch: ElasticsearchSettings = ElasticsearchSettings()
 
 
 settings: Final[Settings] = Settings()
