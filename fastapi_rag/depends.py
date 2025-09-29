@@ -6,7 +6,11 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.vectorstores import VectorStore
 from langchain_gigachat import GigaChat
 from langchain_pinecone import PineconeVectorStore
-from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+    TextSplitter,
+)
 from redis.asyncio import Redis
 
 from .settings import settings
@@ -17,10 +21,15 @@ TIMEOUT = 120
 
 redis: Final[Redis] = Redis.from_url(settings.redis.url)
 
-splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
+md_splitter: Final[MarkdownHeaderTextSplitter] = MarkdownHeaderTextSplitter(
+    headers_to_split_on=[("#", "Заголовок")]
+)
+
+text_splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
     chunk_size=CHUNK_SIZE,
     chunk_overlap=CHUNK_OVERLAP,
-    length_function=len
+    length_function=len,
+    separators=["\n#"],
 )
 
 embeddings: Final[Embeddings] = RemoteHTTPEmbeddings(

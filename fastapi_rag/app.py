@@ -1,17 +1,31 @@
 from typing import Final
 
+from enum import StrEnum
+
 from fastapi import FastAPI, File, Request, UploadFile, status
 from fastapi.responses import JSONResponse
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
+from pydantic import BaseModel
 
 from .indexing import indexing_chain, process_file
 from .rag import agent
-from .schemas import Message, Role, UserMessage
 
 DEFAULT_K = 10
 DEFAULT_MAX_LENGTH = 10
 DEFAULT_TTL = 3600
+
+
+class Role(StrEnum):
+    USER = "user"
+    AI = "ai"
+
+
+class Message(BaseModel):
+    chat_id: str
+    role: Role
+    text: str
+
 
 app: Final[FastAPI] = FastAPI()
 
@@ -33,17 +47,8 @@ async def add_document(document: Document) -> list[Document]:
     summary="",
 )
 async def upload_document(file: UploadFile = File(...)) -> list[Document]:
-    document = await process_file(file.filename, await file.read())
-    return await indexing_chain.ainvoke([document])
-
-
-@app.put(
-    path="/api/v1/prompts",
-    status_code=status.HTTP_200_OK,
-    response_model=...,
-    summary="",
-)
-async def write_prompt() -> ...: ...
+    documents = await process_file(file.filename, await file.read())
+    return await indexing_chain.ainvoke(documents)
 
 
 @app.post(
@@ -52,9 +57,7 @@ async def write_prompt() -> ...: ...
     response_model=Message,
     summary="",
 )
-async def generate_response(
-        user_message: UserMessage
-) -> Message:
+async def generate_response(user_message: Message) -> Message:
     config = RunnableConfig(
         configurable={
             "thread_id": user_message.chat_id,
@@ -64,7 +67,7 @@ async def generate_response(
         }
     )
     state = await agent.ainvoke({"query": user_message.text}, config=config)
-    return Message(role=Role.AI, text=state["response"])
+    return Message(chat_id=user_message.chat_id, role=Role.AI, text=state["response"])
 
 
 @app.exception_handler(ValueError)
