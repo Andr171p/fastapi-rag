@@ -46,10 +46,12 @@ vectorstore: Final[VectorStore] = ElasticsearchStore(
     embedding=embeddings,
 )
 
+elasticsearch_client: Final[Elasticsearch] = Elasticsearch(settings.elasticsearch.url)
+
 similarity_retriever: Final[BaseRetriever] = vectorstore.as_retriever(search_type="similarity")
 
 bm25_retriever: Final[BaseRetriever] = ElasticSearchBM25Retriever(
-    client=Elasticsearch(settings.elasticsearch.url), index_name="rag-index",
+    client=elasticsearch_client, index_name="rag-index",
 )
 
 ensemble_retriever: Final[BaseRetriever] = EnsembleRetriever(

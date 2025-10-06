@@ -1,5 +1,7 @@
 from typing import Final
 
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from enum import StrEnum
 
 from fastapi import FastAPI, File, Request, UploadFile, status
@@ -8,6 +10,7 @@ from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel
 
+from .depends import elasticsearch_client
 from .indexing import indexing_chain, process_file
 from .rag import agent
 
@@ -27,7 +30,14 @@ class Message(BaseModel):
     text: str
 
 
-app: Final[FastAPI] = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncGenerator[None]:  # noqa: RUF029
+    if not elasticsearch_client.indices.exists(index="rag-index"):
+        elasticsearch_client.indices.create(index="rag-index")
+    yield
+
+
+app: Final[FastAPI] = FastAPI(lifespan=lifespan)
 
 
 @app.post(
