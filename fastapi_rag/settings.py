@@ -58,7 +58,14 @@ class ElasticsearchSettings(BaseSettings):
         return f"http://{self.host}:{self.port}"
 
 
+class AppSettings(BaseSettings):
+    port: int = 8001
+
+    model_config = SettingsConfigDict(env_prefix="APP_")
+
+
 class Settings(BaseSettings):
+    app: AppSettings = AppSettings()
     gigachat: GigaChatSettings = GigaChatSettings()
     embeddings: EmbeddingsSettings = EmbeddingsSettings()
     redis: RedisSettings = RedisSettings()

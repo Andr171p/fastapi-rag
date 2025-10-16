@@ -48,14 +48,14 @@ vectorstore: Final[VectorStore] = ElasticsearchStore(
 
 elasticsearch_client: Final[Elasticsearch] = Elasticsearch(settings.elasticsearch.url)
 
-similarity_retriever: Final[BaseRetriever] = vectorstore.as_retriever(search_type="similarity")
+vectorstore_retriever: Final[BaseRetriever] = vectorstore.as_retriever(search_type="similarity")
 
 bm25_retriever: Final[BaseRetriever] = ElasticSearchBM25Retriever(
     client=elasticsearch_client, index_name="rag-index",
 )
 
-ensemble_retriever: Final[BaseRetriever] = EnsembleRetriever(
-    retrievers=[similarity_retriever, bm25_retriever], weights=[0.6, 0.4]
+retriever: Final[BaseRetriever] = EnsembleRetriever(
+    retrievers=[vectorstore_retriever, bm25_retriever], weights=[0.6, 0.4]
 )
 
 llm: Final[BaseChatModel] = GigaChat(

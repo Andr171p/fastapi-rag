@@ -1,10 +1,12 @@
 from typing import Final
 
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from enum import StrEnum
 
 from fastapi import FastAPI, File, Request, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
@@ -13,6 +15,9 @@ from pydantic import BaseModel
 from .depends import elasticsearch_client
 from .indexing import indexing_chain, process_file
 from .rag import agent
+from .settings import TEMP_DIR
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_K = 10
 DEFAULT_MAX_LENGTH = 10
@@ -32,6 +37,9 @@ class Message(BaseModel):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator[None]:  # noqa: RUF029
+    TEMP_DIR.mkdir(exist_ok=True)  # Создание папки '.tmp' в корне проекта
+    if TEMP_DIR.exists():
+        logger.info("Folder '.tmp' is created")
     if not elasticsearch_client.indices.exists(index="rag-index"):
         elasticsearch_client.indices.create(index="rag-index")
     yield
@@ -85,3 +93,12 @@ def handle_value_error(exc: ValueError, request: Request) -> JSONResponse:  # no
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exc)},
     )
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
