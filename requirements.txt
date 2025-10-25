@@ -14,7 +14,7 @@ python-dotenv~=1.1.1
 pydantic-settings~=2.10.1
 embeddings-service[langchain] @ git+https://github.com/Andr171p/embeddings-service.git
 uvicorn~=0.35.0
-elasticsearch~=8.19.1
+langchain-elasticsearch~=0.3.2
 langchain-community~=0.3.30
 faststream~=0.6.2
 websockets~=15.0.1

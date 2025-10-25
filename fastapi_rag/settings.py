@@ -7,12 +7,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = BASE_DIR / ".env"
+SQLITE_URL = BASE_DIR / "db.sqlite3"
 
 load_dotenv(ENV_PATH)
 
 
 class GigaChatSettings(BaseSettings):
-    api_key: str = ""
+    apikey: str = ""
     scope: str = ""
     model_name: str = "GigaChat:latest"
 

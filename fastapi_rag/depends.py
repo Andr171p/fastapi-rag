@@ -19,8 +19,6 @@ from redis.asyncio import Redis
 
 from .settings import settings
 
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 20
 TIMEOUT = 120
 
 redis: Final[Redis] = Redis.from_url(settings.redis.url)
@@ -30,8 +28,8 @@ md_splitter: Final[MarkdownHeaderTextSplitter] = MarkdownHeaderTextSplitter(
 )
 
 text_splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(
-    chunk_size=CHUNK_SIZE,
-    chunk_overlap=CHUNK_OVERLAP,
+    chunk_size=settings.rag.chunk_size,
+    chunk_overlap=settings.rag.chunk_overlap,
     length_function=len,
     separators=["\n#"],
 )
@@ -46,12 +44,12 @@ vectorstore: Final[VectorStore] = ElasticsearchStore(
     embedding=embeddings,
 )
 
-elasticsearch_client: Final[Elasticsearch] = Elasticsearch(settings.elasticsearch.url)
+elasticsearch: Final[Elasticsearch] = Elasticsearch(settings.elasticsearch.url)
 
 vectorstore_retriever: Final[BaseRetriever] = vectorstore.as_retriever(search_type="similarity")
 
 bm25_retriever: Final[BaseRetriever] = ElasticSearchBM25Retriever(
-    client=elasticsearch_client, index_name="rag-index",
+    client=elasticsearch, index_name="rag-index",
 )
 
 retriever: Final[BaseRetriever] = EnsembleRetriever(
@@ -59,10 +57,16 @@ retriever: Final[BaseRetriever] = EnsembleRetriever(
 )
 
 llm: Final[BaseChatModel] = GigaChat(
-    credentials=settings.gigachat.api_key,
+    credentials=settings.gigachat.apikey,
     scope=settings.gigachat.scope,
     model=settings.gigachat.model_name,
     profanity_check=False,
     verify_ssl_certs=False,
     timeout=TIMEOUT,
 )
+
+
+def create_index(index_name: str) -> None:
+    """Создаёт индекс, если он не был создан"""
+    if not elasticsearch.indices.exists(index=index_name):
+        elasticsearch.indices.create(index=index_name)
