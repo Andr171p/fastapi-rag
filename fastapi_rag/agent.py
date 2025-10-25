@@ -12,12 +12,19 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from .depends import llm, redis, retriever
-from .prompts import SYSTEM_PROMPT, USER_PROMPT
-
-TTL = 3600
-MAX_CHAT_HISTORY_LENGTH = 10
+from .settings import settings
 
 logger = logging.getLogger(__name__)
+
+SYSTEM_PROMPT = settings.rag.system_prompt
+USER_PROMPT = """История диалога:
+{conversation_history}
+
+Запрос пользователя:
+{query}
+"""
+TTL = settings.redis.ttl
+MAX_CONVERSATION_HISTORY_LENGTH = settings.rag.max_conversation_history_length
 
 
 class State(TypedDict):
@@ -71,7 +78,7 @@ async def generate(
     user_prompt = USER_PROMPT.format(
         conversation_history="\n".join(state["conversation_history"]), query=state["query"]
     )
-    chain = ChatPromptTemplate.from_template(SYSTEM_PROMPT) | llm | StrOutputParser()
+    chain = ChatPromptTemplate.from_template() | llm | StrOutputParser()
     response = await chain.ainvoke({
         "user_prompt": user_prompt, "context": format_documents(state["documents"]),
     })
@@ -87,7 +94,7 @@ async def cache_conversation_history(
     messages = [f"User: {state["query"]}", f"AI: {state["response"]}"]
     await redis.lpush(key, *messages)
     await redis.expire(key, TTL)
-    await redis.ltrim(key, 0, MAX_CHAT_HISTORY_LENGTH)
+    await redis.ltrim(key, 0, MAX_CONVERSATION_HISTORY_LENGTH)
     return state
 
 
@@ -111,6 +118,5 @@ agent: Final[CompiledStateGraph[State]] = workflow.compile()
 async def execute_agent(chat_id: UUID, query: str) -> str:
     """Функция для вызова RAG агента"""
     config = RunnableConfig(configurable={"chat_id": chat_id})
-    initial_state = {"query": query}
-    accumulated_state = await agent.ainvoke(initial_state, config=config)
+    accumulated_state = await agent.ainvoke({"query": query}, config=config)
     return accumulated_state.get("response", "")

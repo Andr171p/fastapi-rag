@@ -7,8 +7,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = BASE_DIR / ".env"
-TEMP_DIR = BASE_DIR / ".tmp"
-PROMPTS_DIR = BASE_DIR / "prompts"
 
 load_dotenv(ENV_PATH)
 
@@ -34,9 +32,8 @@ class RedisSettings(BaseSettings):
 
 
 class EmbeddingsSettings(BaseSettings):
-    model_name: str = "deepvk/USER-bge-m3"
-    model_kwargs: dict[str, str] = {"device": "cpu"}
-    encode_kwargs: dict[str, bool] = {"normalize_embeddings": False}
+    normalize: bool = False
+    batch_size: int = 32
     base_url: str = "http://127.0.0.1:8000"
 
     model_config = SettingsConfigDict(env_prefix="EMBEDDINGS_")
@@ -59,18 +56,21 @@ class ElasticsearchSettings(BaseSettings):
         return f"http://{self.host}:{self.port}"
 
 
-class AppSettings(BaseSettings):
-    port: int = 8001
+class RAGSettings(BaseSettings):
+    chunk_size: int = 1000
+    chunk_overlap: int = 20
+    system_prompt: str = ""
+    max_conversation_history_length: int = 10
 
-    model_config = SettingsConfigDict(env_prefix="APP_")
+    model_config = SettingsConfigDict(env_prefix="RAG_")
 
 
 class Settings(BaseSettings):
-    app: AppSettings = AppSettings()
     gigachat: GigaChatSettings = GigaChatSettings()
     embeddings: EmbeddingsSettings = EmbeddingsSettings()
     redis: RedisSettings = RedisSettings()
     elasticsearch: ElasticsearchSettings = ElasticsearchSettings()
+    rag: RAGSettings = RAGSettings()
 
 
 settings: Final[Settings] = Settings()
