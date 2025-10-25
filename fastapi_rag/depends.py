@@ -26,7 +26,7 @@ TIMEOUT = 120
 redis: Final[Redis] = Redis.from_url(settings.redis.url)
 
 md_splitter: Final[MarkdownHeaderTextSplitter] = MarkdownHeaderTextSplitter(
-    headers_to_split_on=[("#", "Заголовок")]
+    headers_to_split_on=[("#", "h1")]
 )
 
 text_splitter: Final[TextSplitter] = RecursiveCharacterTextSplitter(

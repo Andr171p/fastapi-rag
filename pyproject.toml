@@ -8,6 +8,7 @@ dependencies = [
     "docx2md>=1.0.4",
     "embeddings-service[langchain]",
     "fastapi[all]>=0.116.1",
+    "faststream>=0.6.2",
     "langchain>=0.3.27",
     "langchain-community>=0.3.30",
     "langchain-elasticsearch>=0.3.2",

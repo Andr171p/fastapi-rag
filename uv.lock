@@ -192,6 +192,7 @@ dependencies = [
     { name = "docx2md" },
     { name = "embeddings-service", extra = ["langchain"] },
     { name = "fastapi", extra = ["all"] },
+    { name = "faststream" },
     { name = "langchain" },
     { name = "langchain-community" },
     { name = "langchain-elasticsearch" },
@@ -215,6 +216,7 @@ requires-dist = [
     { name = "docx2md", specifier = ">=1.0.4" },
     { name = "embeddings-service", extras = ["langchain"], git = "https://github.com/Andr171p/embeddings-service.git" },
     { name = "fastapi", extras = ["all"], specifier = ">=0.116.1" },
+    { name = "faststream", specifier = ">=0.6.2" },
     { name = "langchain", specifier = ">=0.3.27" },
     { name = "langchain-community", specifier = ">=0.3.30" },
     { name = "langchain-elasticsearch", specifier = ">=0.3.2" },
@@ -330,6 +332,24 @@ langchain = [
 ]
 
 [[package]]
+name = "fast-depends"
+version = "3.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9a/a3/e7c234b84c407e4450e3fb930059aca7e786177a8af9954118104cf8ba24/fast_depends-3.0.3.tar.gz", hash = "sha256:fa63413beafc41b9cdd1e3efa7b9231c71d0c9d1c5c19cdc007a3b3c39f83f6e", size = 18172 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/64/935128fefc9a4ffd5e160eec6e6ae6d85956f98e4f452fc57bfe337def92/fast_depends-3.0.3-py3-none-any.whl", hash = "sha256:15f7bb88cbfd541ef185667f73895c5aa32e5803d61b905b3405a43f7da914e8", size = 25292 },
+]
+
+[package.optional-dependencies]
+pydantic = [
+    { name = "pydantic" },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.116.1"
 source = { registry = "https://pypi.org/simple" }
@@ -395,6 +415,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a9/2e/3b6e5016affc310e5109bc580f760586eabecea0c8a7ab067611cd849ac0/fastapi_cloud_cli-0.1.5.tar.gz", hash = "sha256:341ee585eb731a6d3c3656cb91ad38e5f39809bf1a16d41de1333e38635a7937", size = 22710 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e5/a6/5aa862489a2918a096166fd98d9fe86b7fd53c607678b3fa9d8c432d88d5/fastapi_cloud_cli-0.1.5-py3-none-any.whl", hash = "sha256:d80525fb9c0e8af122370891f9fa83cf5d496e4ad47a8dd26c0496a6c85a012a", size = 18992 },
+]
+
+[[package]]
+name = "faststream"
+version = "0.6.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "fast-depends", extra = ["pydantic"] },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/02/df/dfc9de7df06518fca91cdfd1878f040cac95deb844dee82b0880d734c1a0/faststream-0.6.2.tar.gz", hash = "sha256:70a229572f08d4c94fcf0902cef59c9e2b8b4286a0c755989bab2bafa67ea515", size = 297180 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7b/d1/38c3b8aff47329deeba9e0975112dca1c3c0a535d18124e8939d98de9ad9/faststream-0.6.2-py3-none-any.whl", hash = "sha256:0bb1458474f9e05456acc944d9a320d81a894ebf32f1289bc6c54b3052558071", size = 501385 },
 ]
 
 [[package]]

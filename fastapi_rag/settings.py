@@ -24,6 +24,7 @@ class GigaChatSettings(BaseSettings):
 class RedisSettings(BaseSettings):
     host: str = "localhost"
     port: int = 6379
+    ttl: int = 3600  # По умолчанию 1 чс
 
     model_config = SettingsConfigDict(env_prefix="REDIS_")
 
