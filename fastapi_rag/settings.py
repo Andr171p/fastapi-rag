@@ -7,7 +7,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = BASE_DIR / ".env"
-SQLITE_URL = BASE_DIR / "db.sqlite3"
+DB_PATH = BASE_DIR / "db.sqlite3"
+DB_DRIVER = "aiosqlite"
+SQLALCHEMY_URL = f"sqlite+{DB_DRIVER}:///{DB_PATH}"
 
 load_dotenv(ENV_PATH)
 

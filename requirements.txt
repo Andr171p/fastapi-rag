@@ -1,4 +1,5 @@
 aiofiles~=24.1.0
+aiosqlite~=0.21.0
 docx2md~=1.0.4
 fastapi[all]~=0.116.1
 langchain~=0.3.27
@@ -19,3 +20,4 @@ langchain-community~=0.3.30
 faststream~=0.6.2
 websockets~=15.0.1
 SQLAlchemy~=2.0.43
+elasticsearch~=8.19.1

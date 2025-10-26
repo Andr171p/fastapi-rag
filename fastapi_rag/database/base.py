@@ -14,9 +14,9 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from ..settings import SQLITE_URL
+from ..settings import DB_PATH, SQLALCHEMY_URL
 
-engine: Final[AsyncEngine] = create_async_engine(url=SQLITE_URL, echo=True)
+engine: Final[AsyncEngine] = create_async_engine(url=SQLALCHEMY_URL, echo=True)
 
 sessionmaker: Final[async_sessionmaker[AsyncSession]] = async_sessionmaker(
         engine, class_=AsyncSession, autoflush=False, expire_on_commit=False
@@ -24,7 +24,7 @@ sessionmaker: Final[async_sessionmaker[AsyncSession]] = async_sessionmaker(
 
 
 def create_db() -> None:
-    sqlite3.connect(SQLITE_URL)
+    sqlite3.connect(DB_PATH)
 
 
 class Base(AsyncAttrs, DeclarativeBase):

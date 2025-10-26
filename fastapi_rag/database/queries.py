@@ -1,8 +1,9 @@
 from uuid import UUID
 
 from sqlalchemy import func, insert, select, update
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 
+from ..exceptions import PersistingError, ReadingError, UpdateError
 from ..schemas import ChatHistory, Message, Task
 from .base import sessionmaker
 from .models import MessageModel, TaskModel
@@ -18,10 +19,7 @@ async def persist_messages(messages: list[Message]) -> None:
             await session.commit()
     except SQLAlchemyError as e:
         await session.rollback()
-        ...
-    except IntegrityError as e:
-        await session.rollback()
-        ...
+        raise PersistingError(f"Error while persisting messages, error: {e}") from e
 
 
 async def read_message(id: UUID) -> Message | None:  # noqa: A002
@@ -33,7 +31,7 @@ async def read_message(id: UUID) -> Message | None:  # noqa: A002
             model = result.scalar_one_or_none()
         return Message.model_validate(model) if model else None
     except SQLAlchemyError as e:
-        ...
+        raise ReadingError(f"Error while reading message, error: {e}") from e
 
 
 async def read_chat_history(chat_id: UUID, page: int, limit: int) -> ChatHistory:
@@ -58,7 +56,7 @@ async def read_chat_history(chat_id: UUID, page: int, limit: int) -> ChatHistory
                 total_count=total_count, page=page, limit=limit, chat_id=chat_id, messages=messages
             )
     except SQLAlchemyError as e:
-        ...
+        raise ReadingError(f"Error while reading chat history, error: {e}") from e
 
 
 async def persist_task(task: Task) -> None:
@@ -68,7 +66,7 @@ async def persist_task(task: Task) -> None:
             await session.execute(stmt)
             await session.commit()
     except SQLAlchemyError as e:
-        ...
+        raise PersistingError(f"Error while persisting task, error: {e}") from e
 
 
 async def read_task(task_id: UUID) -> Task | None:
@@ -91,7 +89,7 @@ async def read_task(task_id: UUID) -> Task | None:
             )
     except SQLAlchemyError as e:
         await session.rollback()
-        ...
+        raise ReadingError(f"Error while reading task, error: {e}") from e
 
 
 async def update_task(task_id: UUID, **kwargs) -> None:
@@ -107,3 +105,4 @@ async def update_task(task_id: UUID, **kwargs) -> None:
             await session.commit()
     except SQLAlchemyError as e:
         await session.rollback()
+        raise UpdateError(f"Error while update task, error: {e}") from e

@@ -7,8 +7,9 @@ from .agent import execute_agent
 from .database.queries import persist_messages, update_task
 from .exceptions import AppError
 from .schemas import Message, Role, TaskProcess, TaskStatus
+from .settings import settings
 
-broker = RedisBroker()
+broker = RedisBroker(url=settings.redis.url)
 
 app: Final[FastStream] = FastStream(broker)
 

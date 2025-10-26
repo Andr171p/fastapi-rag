@@ -38,8 +38,10 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      - redis
-      - elasticsearch
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 
 volumes:
   redis_data:

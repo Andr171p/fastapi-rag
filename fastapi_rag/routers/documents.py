@@ -13,6 +13,6 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
     summary="Загружает документы в базу знаний"
 )
 async def upload_documents(file: UploadFile = File(...)) -> list[Document]:
-    data = await file.read()
-    async with open_temp_file(data) as temp_file:
+    filedata = await file.read()
+    async with open_temp_file(filedata) as temp_file:
         return await indexing_chain.ainvoke(temp_file)
