@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, UploadFile, status
 from langchain_core.documents import Document
 
-from ..indexing import indexing_chain, open_temp_file
+from ..indexing import indexing_file
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -14,5 +14,4 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 )
 async def upload_documents(file: UploadFile = File(...)) -> list[Document]:
     filedata = await file.read()
-    async with open_temp_file(filedata, suffix=f".{file.filename.split(".")[-1]}") as temp_file:
-        return await indexing_chain.ainvoke(temp_file)
+    return await indexing_file(filedata, file.filename)

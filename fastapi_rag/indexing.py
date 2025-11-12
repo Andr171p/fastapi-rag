@@ -7,7 +7,6 @@ import pymupdf4llm
 from aiofiles.threadpool.binary import AsyncFileIO
 from docx2md import Converter, DocxFile, DocxMedia
 from langchain_core.documents import Document
-from langchain_core.runnables import RunnablePassthrough
 
 from .depends import md_splitter, text_splitter, vectorstore
 
@@ -38,11 +37,11 @@ async def process_file(file: AsyncFileIO) -> list[Document]:
     """
     filename = file.name
     extension = str(filename).split(".")[-1]
-    if extension not in AVAILABLE_EXTENSIONS:
+    '''if extension not in AVAILABLE_EXTENSIONS:
         raise ValueError(
             f"""Unsupported file format: {extension},
             supported extensions: {AVAILABLE_EXTENSIONS}"""
-        )
+        )'''
     match extension:
         case "docx" | "doc":
             docx = DocxFile(filename)
@@ -60,9 +59,11 @@ async def process_file(file: AsyncFileIO) -> list[Document]:
     return md_splitter.split_text(md_text)
 
 
-indexing_chain = (
-    RunnablePassthrough()
-    | process_file
-    | text_splitter.split_documents
-    | vectorstore.aadd_documents
-)
+async def indexing_file(data: bytes, filename: str) -> list[Document]:
+    async with (open_temp_file(
+            data, suffix=f".{filename.rsplit(".", maxsplit=1)[-1]}") as temp_file
+    ):
+        documents = await process_file(temp_file)
+        documents = text_splitter.split_documents(documents)
+        await vectorstore.aadd_documents(documents)
+        return documents
