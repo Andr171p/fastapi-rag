@@ -14,5 +14,5 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 )
 async def upload_documents(file: UploadFile = File(...)) -> list[Document]:
     filedata = await file.read()
-    async with open_temp_file(filedata) as temp_file:
+    async with open_temp_file(filedata, suffix=f".{file.filename.split(".")[-1]}") as temp_file:
         return await indexing_chain.ainvoke(temp_file)

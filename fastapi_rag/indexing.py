@@ -17,12 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def open_temp_file(data: bytes) -> AsyncGenerator[AsyncFileIO]:
+async def open_temp_file(data: bytes, suffix: str) -> AsyncGenerator[AsyncFileIO]:
     """Контекстный менеджер для открытия и работы с временным файлом.
 
     :param data: Данные (поток байтов), которые нужно записать в файл.
+    :param suffix: Суффикс временного файла.
     """
-    async with aiofiles.tempfile.NamedTemporaryFile(mode="wb", encoding="utf-8") as file:
+    async with aiofiles.tempfile.NamedTemporaryFile(mode="wb", suffix=suffix) as file:
         await file.write(data)
         await file.flush()
         yield file
